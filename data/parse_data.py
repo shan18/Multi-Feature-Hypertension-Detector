@@ -53,7 +53,7 @@ if __name__ == '__main__':
         help='Path to folder containing the IHR data'
     )
     parser.add_argument(
-        '--output', default=os.path.join(BASE_DIR, 'dataset.json'),
+        '--output', default=os.path.join(BASE_DIR, 'physiobank_dataset.json'),
         help='Name of file in which dataset will be stored'
     )
     args = parser.parse_args()
