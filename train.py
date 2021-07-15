@@ -175,4 +175,5 @@ if __name__ == '__main__':
     )
 
     # Test model
+    model.load_state_dict(torch.load('hypertension_detector.pt'))
     eval(model, test_loader, criterion, device, type='test')
