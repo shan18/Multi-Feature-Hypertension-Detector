@@ -18,7 +18,9 @@ The IHR records are first fed to a series of Conv-1D blocks followed by a max po
 
 ## Installation
 
-Before starting setting up the code. The WFDB Software Package needs to be installed on your system. Go to the [WFDB](https://archive.physionet.org/physiotools/wfdb.shtml) website to see the installation instructions.
+- Before starting setting up the code. The WFDB Software Package needs to be installed on your system. Go to the [WFDB](https://archive.physionet.org/physiotools/wfdb.shtml) website to see the installation instructions.
+- Run the command below to install the required python dependencies  
+   `$ pip install -r requirements.txt`
 
 ## Dataset
 

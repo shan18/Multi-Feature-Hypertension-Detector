@@ -2,7 +2,6 @@ import os
 import json
 import random
 import argparse
-import numpy as np
 import torch
 from torch import nn, optim
 from torch.utils.data import Dataset, DataLoader
