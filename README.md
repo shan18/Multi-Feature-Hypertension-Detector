@@ -24,17 +24,16 @@ The IHR records are first fed to a series of Conv-1D blocks followed by a max po
 
 ## Dataset
 
-Two datasets were used from the [PhysioNet](https://physionet.org/) database
+Three datasets were used from the [PhysioNet](https://physionet.org/) database
 
 - Smart Health for Assessing the Risk of Events via ECG Database 1.0.0 (shareedb)
+- MIT-BIH Normal Sinus Rhythm Database (nsrdb)
 - Normal Sinus Rhythm RR Interval Database (nsr2db)
 
 To setup the dataset, follow the steps below
 
-- Download the [shareedb](https://physionet.org/content/shareedb/1.0.0/) and the [nsr2db](https://physionet.org/content/nsr2db/1.0.0/) datasets.
-- Extract the downloaded datasets and put the contents of the datasets inside the directories `data/files/shareedb` and `data/files/nsr2db` respectively.
-- Run the command  
-   `$ mv data/files/shareedb/info.txt data/files/shareedb_info.txt`
+- Download the [shareedb](https://physionet.org/content/shareedb/1.0.0/), [nsrdb](https://www.physionet.org/content/nsrdb/1.0.0/), and the [nsr2db](https://physionet.org/content/nsr2db/1.0.0/) datasets.
+- Extract the downloaded datasets and put the contents of the datasets inside the directories `data/files/shareedb`, `data/files/nsrdb`, and `data/files/nsr2db` respectively.
 - Now extract the required data from the datasets  
    `$ python3 data/extract_records.py`
 - Parse the extracted data to create the final dataset  

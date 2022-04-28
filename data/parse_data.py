@@ -1,5 +1,6 @@
 import os
 import json
+import random
 import argparse
 
 
@@ -28,14 +29,13 @@ def create_data(user_info, ihr_dir, output_file):
         ihr_sequences = get_ihr_sequences(os.path.join(ihr_dir, f'{record["record"]}.txt'))
         data.extend([{
             'ihr': sequence,
-            'gender': record['gender'],
-            'age': record['age'],
-            'hypertensive': record['hypertensive'],
+            **record,
         } for sequence in ihr_sequences])
         print(f'\rProgress: {count + 1}/{num_records}', end='\r')
     print()
 
     print('Saving...')
+    random.shuffle(data)
     with open(output_file, 'w') as f:
         json.dump(data, f, indent=2)
     print('Done.')
