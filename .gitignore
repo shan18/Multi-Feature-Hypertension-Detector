@@ -5,3 +5,6 @@ packages/
 notes.md
 data/files
 *.json
+data/archive/
+checkpoints
+*.hdf5

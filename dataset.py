@@ -1,102 +1,49 @@
 import json
-import random
 import torch
+import h5py
 from torch.utils.data import Dataset, DataLoader
 
 
-class PhysioBank:
-    def __init__(
-        self, path, train_batch_size=1, val_batch_size=1, test_batch_size=1,
-        cuda=False, num_workers=1, train_split=0.7, val_split=0.15, mean=78.78, std=28.35
-    ):
-        """Initializes the dataset for loading."""
-
-        self.path = path
-        self.cuda = cuda
-        self.num_workers = num_workers
-        self.train_split = train_split
-        self.val_split = val_split
-        self.train_batch_size = train_batch_size
-        self.val_batch_size = val_batch_size
-        self.test_batch_size = test_batch_size
-        self.mean = mean
-        self.std = std
-
-        # Get data
-        self._create_data(self._read_data())
-    
-    def _read_data(self):
-        with open(self.path) as f:
-            data = json.load(f)
-        return data
-    
-    def _get_normalization(self, samples):
-        self.transition, self.scale = {}, {}
-
-        # IHR
-        samples_ihr = [y for x in samples for y in x['ihr']]
-        self.transition['ihr'] = min(samples_ihr)
-        self.scale['ihr'] = max(samples_ihr) - self.transition['ihr']
-
-        # Age
-        samples_age = [x['age'] for x in samples]
-        self.transition['age'] = min(samples_age)
-        self.scale['age'] = max(samples_age) - self.transition['age']
-
-    def _create_data(self, samples):
-        random.shuffle(samples)
-
-        # Calculate number of samples in each set
-        train_limit = int(len(samples) * self.train_split)
-        val_limit = int(len(samples) * self.val_split)
-
-        # Distribute data
-        self._get_normalization(samples[:train_limit])
-        self.train_data = PhysioBankDataset(samples[:train_limit], self.transition, self.scale)
-        self.val_data = PhysioBankDataset(samples[train_limit:train_limit + val_limit], self.transition, self.scale)
-        self.test_data = PhysioBankDataset(samples[train_limit + val_limit:], self.transition, self.scale)
-
-    def loader(self, type='train', shuffle=True):
-        loader_args = { 'shuffle': shuffle }
-
-        # If GPU exists
-        if self.cuda:
-            loader_args['num_workers'] = self.num_workers
-            loader_args['pin_memory'] = True
-
-        if type == 'train':
-            loader_args['batch_size'] = self.train_batch_size
-            return DataLoader(self.train_data, **loader_args)
-        elif type == 'val':
-            loader_args['batch_size'] = self.val_batch_size
-            return DataLoader(self.val_data, **loader_args)
-        else:
-            loader_args['batch_size'] = self.test_batch_size
-            return DataLoader(self.test_data, **loader_args)
+MIN_MAX_VALUES = {
+    'ihr': [0.08, 256],
+    'age': [21, 92],
+    'bsa': [1.47, 2.3],
+    'bmi': [18.37, 40.04],
+    'sbp': [95, 200.0],
+    'dbp': [30, 100.0]
+}
 
 
 class PhysioBankDataset(Dataset):
-    def __init__(self, samples, transition, scale):
-        """Initializes the dataset for loading."""
-        super(PhysioBankDataset, self).__init__()
-        self.samples = samples
-        self.transition = transition
-        self.scale = scale
+
+    def __init__(self, data_file, user_info_file):
+        super().__init__()
+        self.data = h5py.File(data_file, 'r')
+        self.data_keys = list(self.data.keys())
+        with open(user_info_file) as f:
+            self.user_info = {x['record']: x for x in json.load(f)}
 
     def __len__(self):
-        """Returns length of the dataset."""
-        return len(self.samples)
+        return len(self.data_keys)
 
     def __getitem__(self, index):
-        sample = self.samples[index]
+        ihr = self.data[self.data_keys[index]][:]
+        record = self.user_info[self.data[self.data_keys[index]].attrs['record']]
 
         return (
-            (
-                (torch.FloatTensor(sample['ihr']) - self.transition['ihr']) / self.scale['ihr'],
-                torch.FloatTensor([
-                    sample['gender'],
-                    (sample['age'] - self.transition['age']) / self.scale['age']
-                ])
-            ),
-            torch.FloatTensor([sample['hypertensive']])
+            (torch.FloatTensor(ihr) - MIN_MAX_VALUES['ihr'][0]) / (MIN_MAX_VALUES['ihr'][1] - MIN_MAX_VALUES['ihr'][0]),
+            torch.FloatTensor([
+                record['gender'],
+                record['smoker'],
+                record['vascular_event'],
+                (record['age'] - MIN_MAX_VALUES['age'][0]) / (MIN_MAX_VALUES['age'][1] - MIN_MAX_VALUES['age'][0]),
+                (record['bsa'] - MIN_MAX_VALUES['bsa'][0]) / (MIN_MAX_VALUES['bsa'][1] - MIN_MAX_VALUES['bsa'][0]),
+                (record['bmi'] - MIN_MAX_VALUES['bmi'][0]) / (MIN_MAX_VALUES['bmi'][1] - MIN_MAX_VALUES['bmi'][0]),
+                (record['sbp'] - MIN_MAX_VALUES['sbp'][0]) / (MIN_MAX_VALUES['sbp'][1] - MIN_MAX_VALUES['sbp'][0]),
+                (record['dbp'] - MIN_MAX_VALUES['dbp'][0]) / (MIN_MAX_VALUES['dbp'][1] - MIN_MAX_VALUES['dbp'][0])
+            ]),
+            torch.FloatTensor([record['hypertensive']])
         )
+
+    def loader(self, batch_size, num_workers, shuffle=True):
+        return DataLoader(self, batch_size=batch_size, num_workers=num_workers, shuffle=shuffle)
