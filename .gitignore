@@ -8,3 +8,4 @@ data/files
 data/archive/
 checkpoints
 *.hdf5
+.ipynb_checkpoints
