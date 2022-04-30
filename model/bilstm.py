@@ -3,7 +3,7 @@ from torch import nn
 
 
 class HypertensionDetectorBiLSTM(nn.Module):
-    def __init__(self, hidden_dim, seq_meta_len, n_layers, dropout, device):
+    def __init__(self, hidden_dim, seq_meta_len, n_layers, fc_dim, dropout, device):
         super().__init__()
 
         self.n_layers = n_layers
@@ -13,9 +13,11 @@ class HypertensionDetectorBiLSTM(nn.Module):
         self.seq_meta_fc = nn.Linear(seq_meta_len, hidden_dim)
         self.rnn = nn.LSTM(1, hidden_dim, num_layers=n_layers, bidirectional=True, dropout=dropout)
 
-        self.fc1 = nn.Linear(2 * n_layers * hidden_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, 1)
-    
+        self.global_pool = nn.AdaptiveMaxPool1d(1)
+
+        self.fc1 = nn.Linear(hidden_dim, fc_dim)
+        self.fc2 = nn.Linear(fc_dim, 1)
+
     def forward(self, seq, seq_meta):
         """Input shapes
 
@@ -36,9 +38,10 @@ class HypertensionDetectorBiLSTM(nn.Module):
             )
         )  # [2 * num_layers, batch_size, hidden_dim]
 
-        hidden = hidden.permute(1, 0, 2).reshape(batch_size, -1)  # [batch_size, 2 * num_layers * hidden_dim]
+        hidden = hidden.permute(1, 2, 0)  # [batch_size, hidden_dim, 2 * num_layers]
+        hidden = self.global_pool(hidden).squeeze(-1)  # [batch_size, hidden_dim]
 
-        output = self.fc1(hidden)  # [batch_size, 1]
-        output = self.fc2(output)
-    
+        output = self.fc1(hidden)  # [batch_size, fc_dim]
+        output = self.fc2(output)  # [batch_size, 1]
+
         return output
