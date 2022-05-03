@@ -9,3 +9,5 @@ data/archive/
 checkpoints
 *.hdf5
 .ipynb_checkpoints
+*.h5
+*.csv

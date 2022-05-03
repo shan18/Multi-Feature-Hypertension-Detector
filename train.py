@@ -55,20 +55,21 @@ def train(model, loader, optimizer, criterion, device):
         y_true = target if y_true is None else torch.cat((y_true, target), dim=0)
         y_pred = pred if y_pred is None else torch.cat((y_pred, pred), dim=0)
 
-        pbar.update(batch_idx, values=[('Loss', round(loss.item(), 2))])
+        pbar.update(batch_idx, values=[('Loss', round(loss.item(), 4))])
 
     y_true, y_pred = y_true.to('cpu'), y_pred.to('cpu')
     pbar.add(1, values=[
-        ('Loss', round(loss.item(), 2)),
-        ('Accuracy', round(accuracy_score(y_true, y_pred), 2)),
-        ('Precision', round(precision_score(y_true, y_pred), 2)),
-        ('Recall', round(recall_score(y_true, y_pred), 2)),
-        ('F1', round(f1_score(y_true, y_pred), 2))
+        ('Loss', round(loss.item(), 4)),
+        ('Accuracy', round(accuracy_score(y_true, y_pred), 4) * 100),
+        ('Precision', round(precision_score(y_true, y_pred), 4)),
+        ('Recall', round(recall_score(y_true, y_pred), 4)),
+        ('F1', round(f1_score(y_true, y_pred), 4))
     ])
 
 
 def eval(model, loader, criterion, device, type='val'):
     model.eval()
+    loss = 0
     y_true = None
     y_pred = None
 
@@ -93,10 +94,10 @@ def eval(model, loader, criterion, device, type='val'):
     print(
         f'{"Validation" if type == "val" else "Test"} set:'
         f'Average loss: {loss:.4f},'
-        f'Accuracy: {accuracy_score(y_true, y_pred):.2f}%',
-        f'Precision: {precision_score(y_true, y_pred):.2f}%',
-        f'Recall: {recall_score(y_true, y_pred):.2f}%',
-        f'F1: {f1:.2f}%\n'
+        f'Accuracy: {accuracy_score(y_true, y_pred) * 100:.2f}%',
+        f'Precision: {precision_score(y_true, y_pred):.2f}',
+        f'Recall: {recall_score(y_true, y_pred):.2f}',
+        f'F1: {f1:.2f}\n'
     )
 
     return f1
