@@ -47,3 +47,8 @@ class PhysioBankDataset(Dataset):
 
     def loader(self, batch_size, num_workers, shuffle=True):
         return DataLoader(self, batch_size=batch_size, num_workers=num_workers, shuffle=shuffle)
+
+
+def create_dataset(data_file, user_info_file, batch_size, num_workers):
+    dataset = PhysioBankDataset(data_file, user_info_file)
+    return dataset, dataset.loader(batch_size, num_workers)

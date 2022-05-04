@@ -6,8 +6,12 @@ class HypertensionDetectorBiLSTM(nn.Module):
     def __init__(self, hidden_dim, seq_meta_len, n_layers, fc_dim, dropout, device):
         super().__init__()
 
-        self.n_layers = n_layers
+        self.arch = 'bilstm'
         self.hidden_dim = hidden_dim
+        self.seq_meta_len = seq_meta_len
+        self.n_layers = n_layers
+        self.fc_dim = fc_dim
+        self.dropout = dropout
         self.device = device
 
         self.seq_meta_fc = nn.Linear(seq_meta_len, hidden_dim)

@@ -1,6 +1,1 @@
-from .bilstm import HypertensionDetectorBiLSTM
-from .cnn_gru import HypertensionDetectorConvGRU
-
-
-def count_parameters(model):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+from .utils import create_model, load_model, save_model

@@ -3,11 +3,15 @@ from torch import nn
 
 
 class HypertensionDetectorConvGRU(nn.Module):
-    def __init__(self, rnn_hidden_dim, fc_dim, seq_meta_len, n_layers, dropout):
+    def __init__(self, rnn_hidden_dim, seq_meta_len, n_layers, fc_dim, dropout):
         super().__init__()
 
-        self.n_layers = n_layers
+        self.arch = 'cnn_gru'
         self.rnn_hidden_dim = rnn_hidden_dim
+        self.fc_dim = fc_dim
+        self.seq_meta_len = seq_meta_len
+        self.n_layers = n_layers
+        self.dropout = dropout
 
         self.conv1 = self._create_conv_sequence(1, 32, 3, dropout)
         self.conv2 = self._create_conv_sequence(32, 64, 3, dropout)
