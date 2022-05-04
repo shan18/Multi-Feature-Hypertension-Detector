@@ -1,6 +1,8 @@
 import json
+import random
+import numpy as np
 import torch
-import h5py
+import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 
 
@@ -18,29 +20,41 @@ class PhysioBankDataset(Dataset):
 
     def __init__(self, data_file, user_info_file):
         super().__init__()
-        self.data = h5py.File(data_file, 'r')
-        self.data_keys = list(self.data.keys())
+
+        self.data_file = data_file
         with open(user_info_file) as f:
             self.user_info = {x['record']: x for x in json.load(f)}
 
+        # Index samples
+        self.samples = [
+            (user_val['record'], num_seq)
+            for user_val in self.user_info.values()
+            for num_seq in range(user_val['num_seq'])
+        ]
+        random.shuffle(self.samples)
+
     def __len__(self):
-        return len(self.data_keys)
+        return len(self.samples)
+
+    def _normalize(self, data, min_max_attr):
+        return (data - MIN_MAX_VALUES[min_max_attr][0]) / (MIN_MAX_VALUES[min_max_attr][1] - MIN_MAX_VALUES[min_max_attr][0])
 
     def __getitem__(self, index):
-        ihr = self.data[self.data_keys[index]][:]
-        record = self.user_info[self.data[self.data_keys[index]].attrs['record']]
+        sample = self.samples[index]
+        record = self.user_info[sample[0]]
+        ihr = np.array(pd.read_hdf(self.data_file, key=sample[0], start=sample[1], stop=sample[1]+1))[0]
 
         return (
-            (torch.FloatTensor(ihr) - MIN_MAX_VALUES['ihr'][0]) / (MIN_MAX_VALUES['ihr'][1] - MIN_MAX_VALUES['ihr'][0]),
+            self._normalize(torch.FloatTensor(ihr), 'ihr'),
             torch.FloatTensor([
                 record['gender'],
                 record['smoker'],
                 record['vascular_event'],
-                (record['age'] - MIN_MAX_VALUES['age'][0]) / (MIN_MAX_VALUES['age'][1] - MIN_MAX_VALUES['age'][0]),
-                (record['bsa'] - MIN_MAX_VALUES['bsa'][0]) / (MIN_MAX_VALUES['bsa'][1] - MIN_MAX_VALUES['bsa'][0]),
-                (record['bmi'] - MIN_MAX_VALUES['bmi'][0]) / (MIN_MAX_VALUES['bmi'][1] - MIN_MAX_VALUES['bmi'][0]),
-                (record['sbp'] - MIN_MAX_VALUES['sbp'][0]) / (MIN_MAX_VALUES['sbp'][1] - MIN_MAX_VALUES['sbp'][0]),
-                (record['dbp'] - MIN_MAX_VALUES['dbp'][0]) / (MIN_MAX_VALUES['dbp'][1] - MIN_MAX_VALUES['dbp'][0])
+                self._normalize(record['age'], 'age'),
+                self._normalize(record['bsa'], 'bsa'),
+                self._normalize(record['bmi'], 'bmi'),
+                self._normalize(record['sbp'], 'sbp'),
+                self._normalize(record['dbp'], 'dbp'),
             ]),
             torch.FloatTensor([record['hypertensive']])
         )

@@ -11,8 +11,8 @@ from engine import fit
 def run_training(args, device):
     # Create dataset
     print('Loading dataset')
-    train_dataset, train_loader = create_dataset(args.train_data, args.user_info, args.batch_size, args.num_workers)
-    _, val_loader = create_dataset(args.val_data, args.user_info, args.batch_size, args.num_workers)
+    train_dataset, train_loader = create_dataset(args.data_file, args.train_data, args.batch_size, args.num_workers)
+    _, val_loader = create_dataset(args.data_file, args.val_data, args.batch_size, args.num_workers)
 
     # Create model
     print('Creating model')
@@ -48,7 +48,7 @@ def run_test(args, device):
 
     # Create dataset
     print('Creating dataset...')
-    _, test_loader = create_dataset(args.test_data, args.user_info, args.batch_size, args.num_workers)
+    _, test_loader = create_dataset(args.data_file, args.test_data, args.batch_size, args.num_workers)
 
     # Create model
     print('Loading model...')
@@ -100,8 +100,6 @@ if __name__ == '__main__':
 
     # Set device
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-    run_training(args, device)
 
     if not args.test:
         if os.path.exists(args.checkpoint):
