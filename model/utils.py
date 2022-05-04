@@ -21,7 +21,7 @@ def create_model(
     summary(model)
     print()
 
-    return model
+    return torch.nn.DataParallel(model)
 
 
 def save_model(model, path):

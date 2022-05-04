@@ -67,6 +67,7 @@ def create_data(user_info_file, ihr_dir, overlap_count, output_file, num_threads
     for idx in range(num_records):
         user_info[idx]['num_seq'] = user_seq_info[user_info[idx]['record']]
         user_info[idx]['record'] = f'r{user_info[idx]["record"]}'
+    user_info = [x for x in user_info if x['num_seq'] > 0]
     write_file(user_info_file, user_info)
 
 
