@@ -25,16 +25,16 @@ def create_model(
 
 
 def save_model(model, path):
-    ckpt_args = {'state_dict': model.state_dict(), 'arch': model.arch}
-    if model.arch == 'bilstm':
+    ckpt_args = {'state_dict': model.state_dict(), 'arch': model.module.arch}
+    if model.module.arch == 'bilstm':
         ckpt_args['args'] = [
-            model.hidden_dim, model.seq_meta_len, model.n_layers,
-            model.fc_dim, model.dropout, model.device
+            model.module.hidden_dim, model.module.seq_meta_len, model.module.n_layers,
+            model.module.fc_dim, model.module.dropout, model.module.device
         ]
-    elif model.arch == 'cnn_gru':
+    elif model.module.arch == 'cnn_gru':
         ckpt_args['args'] = [
-            model.rnn_hidden_dim,  model.seq_meta_len, model.n_layers,
-            model.fc_dim, model.dropout, None
+            model.module.rnn_hidden_dim,  model.module.seq_meta_len, model.module.n_layers,
+            model.module.fc_dim, model.module.dropout, None
         ]
     torch.save(ckpt_args, path)
 

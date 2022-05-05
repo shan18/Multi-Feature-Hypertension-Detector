@@ -75,7 +75,7 @@ if __name__ == '__main__':
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--user_info', default=os.path.join(BASE_DIR, 'user_info.json'),
+        '--user_info', default=os.path.join(BASE_DIR, 'files', 'user_info.json'),
         help='Path to user info json'
     )
     parser.add_argument(
@@ -92,7 +92,7 @@ if __name__ == '__main__':
         help='Split of train, val, test'
     )
     parser.add_argument(
-        '--output', default=os.path.join(BASE_DIR, 'physiobank_dataset.h5'),
+        '--output', default=os.path.join(BASE_DIR, 'files', 'physiobank_dataset.h5'),
         help='Name of file in which dataset will be stored'
     )
     args = parser.parse_args()
