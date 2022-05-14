@@ -5,7 +5,7 @@ import torch
 from torch import nn, optim
 from dataset import create_dataset
 from model import create_model, save_model, load_model
-from engine import fit
+from engine import fit, eval
 
 
 def run_training(args, device):
@@ -83,13 +83,13 @@ if __name__ == '__main__':
         help='Path to test dataset json file'
     )
     parser.add_argument('--batch_size', type=int, default=256, help='batch size')
-    parser.add_argument('--model', required=True, choices=['bilstm', 'cnn_gru'], help='Type of model')
+    parser.add_argument('--model', default='cnn_gru', choices=['bilstm', 'cnn_gru'], help='Type of model')
     parser.add_argument('--epochs', type=int, default=100, help='Number of epochs')
     parser.add_argument('--rnn_dim', type=int, default=256, help='Hidden dimension of RNN')
     parser.add_argument('--n_layers', type=int, default=1, help='Number of RNN layers')
     parser.add_argument('--dropout', type=float, default=0.1, help='Dropout rate')
     parser.add_argument('--fc_dim', type=int, default=50, help='Hidden dimenstion of FC layers')
-    parser.add_argument('--checkpoint', required=True, help='Path to checkpoint')
+    parser.add_argument('--checkpoint', default=os.path.join(BASE_DIR, 'checkpoints/model.pt'), help='Path to checkpoint')
     parser.add_argument('--num_workers', type=int, default=8, help='Number of workers')
     parser.add_argument('--test', action='store_true', help='Run test only')
     args = parser.parse_args()
@@ -102,8 +102,13 @@ if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     if not args.test:
-        if os.path.exists(args.checkpoint):
-            raise ValueError('Checkpoint already exists')
+        checkpoint_file_counter = 0
+        while os.path.exists(args.checkpoint):
+            if checkpoint_file_counter == 0:
+                print(f'{args.checkpoint} already exists.')
+            checkpoint_file_counter += 1
+            args.checkpoint = args.checkpoint.replace('.pt', f'_{checkpoint_file_counter}.pt')
+        print(f'Checkpointing at: {args.checkpoint}\n')
         run_training(args, device)
 
     run_test(args, device)

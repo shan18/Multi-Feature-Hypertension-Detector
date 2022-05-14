@@ -20,7 +20,10 @@ class HypertensionDetectorConvGRU(nn.Module):
 
         self.seq_meta_fc = nn.Linear(seq_meta_len, rnn_hidden_dim)
 
-        self.rnn = nn.GRU(128, rnn_hidden_dim, num_layers=n_layers, bidirectional=True, dropout=dropout)
+        self.rnn = nn.GRU(
+            128, rnn_hidden_dim, num_layers=n_layers, bidirectional=True,
+            dropout=dropout if n_layers > 1 else 0
+        )
 
         self.fc1 = nn.Linear(2 * n_layers * rnn_hidden_dim, fc_dim)
         self.fc2 = nn.Linear(fc_dim, 1)

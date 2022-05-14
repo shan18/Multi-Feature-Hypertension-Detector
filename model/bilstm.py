@@ -15,7 +15,10 @@ class HypertensionDetectorBiLSTM(nn.Module):
         self.device = device
 
         self.seq_meta_fc = nn.Linear(seq_meta_len, hidden_dim)
-        self.rnn = nn.LSTM(1, hidden_dim, num_layers=n_layers, bidirectional=True, dropout=dropout)
+        self.rnn = nn.LSTM(
+            1, hidden_dim, num_layers=n_layers, bidirectional=True,
+            dropout=dropout if n_layers > 1 else 0
+        )
 
         self.global_pool = nn.AdaptiveMaxPool1d(1)
 
