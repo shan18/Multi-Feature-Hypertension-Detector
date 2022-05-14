@@ -65,11 +65,11 @@ def eval(model, loader, criterion, device, type='val'):
     y_true, y_pred = y_true.to('cpu'), y_pred.to('cpu')
     f1 = f1_score(y_true, y_pred)
     print(
-        f'{"Validation" if type == "val" else "Test"} set:'
-        f'Average loss: {loss:.4f},'
-        f'Accuracy: {accuracy_score(y_true, y_pred) * 100:.2f}%',
-        f'Precision: {precision_score(y_true, y_pred):.2f}',
-        f'Recall: {recall_score(y_true, y_pred):.2f}',
+        f'{"Validation" if type == "val" else "Test"} set: '
+        f'Average loss: {loss:.4f}, '
+        f'Accuracy: {accuracy_score(y_true, y_pred) * 100:.2f}% ',
+        f'Precision: {precision_score(y_true, y_pred):.2f} ',
+        f'Recall: {recall_score(y_true, y_pred):.2f} ',
         f'F1: {f1:.2f}\n'
     )
 
