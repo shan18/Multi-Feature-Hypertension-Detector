@@ -56,6 +56,7 @@ class HypertensionDetectorConvGRU(nn.Module):
         seq_meta = self.seq_meta_fc(seq_meta)  # [batch_size, rnn_hidden_dim]
         seq_meta = seq_meta.unsqueeze(0).repeat(self.n_layers * 2, 1, 1)  # [n_layers * 2, batch_size, rnn_hidden_dim]
 
+        self.rnn.flatten_parameters()  # Making the weights contiguous for Multi-GPU training
         _, hidden = self.rnn(
             features, seq_meta
         )  # [2 * num_layers, batch_size, rnn_hidden_dim]

@@ -11,3 +11,4 @@ checkpoints
 .ipynb_checkpoints
 *.h5
 *.csv
+logs/
